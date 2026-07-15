@@ -1,0 +1,342 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Smart Business Idea Agent — Preview</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#161b24;--panel:#1c2333;--border:#2a3347;
+  --text:#e2e8f0;--muted:#7a8aa0;--accent:#4f8ef7;--accent2:#a78bfa;
+  --green:#34d399;--yellow:#fbbf24;--red:#f87171;--radius:10px;
+  --font:-apple-system,"Segoe UI",system-ui,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:.3px;}
+.logo-icon{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.logo-icon svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;}
+.badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--panel);border:1px solid var(--border);color:var(--muted);}
+.badge.live{border-color:var(--green);color:var(--green);}
+.header-right{display:flex;align-items:center;gap:12px;}
+.model-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:4px 12px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:220px 1fr 260px;flex:1;overflow:hidden;height:calc(100vh - 57px);}
+
+/* SIDEBAR */
+aside{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px;gap:6px;overflow-y:auto;}
+.sidebar-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:8px 4px 4px;}
+.sidebar-btn{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);border:1px solid transparent;background:none;color:var(--text);font-size:13px;cursor:pointer;text-align:left;transition:background .15s,border-color .15s;}
+.sidebar-btn:hover{background:var(--panel);}
+.sidebar-btn.active{background:var(--panel);border-color:var(--accent);color:var(--accent);}
+.idea-chip{font-size:11px;padding:5px 9px;border-radius:6px;background:var(--panel);border:1px solid var(--border);color:var(--muted);margin-bottom:4px;cursor:pointer;transition:border-color .15s,color .15s;}
+.idea-chip:hover{border-color:var(--accent);color:var(--text);}
+
+/* CHAT */
+main{display:flex;flex-direction:column;overflow:hidden;}
+.chat-window{flex:1;overflow-y:auto;padding:24px 24px;display:flex;flex-direction:column;gap:18px;}
+.chat-window::-webkit-scrollbar{width:4px;}
+.chat-window::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+.welcome{text-align:center;padding:40px 20px;}
+.welcome h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.welcome p{color:var(--muted);max-width:440px;margin:0 auto 24px;font-size:13px;}
+.prompt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:480px;margin:0 auto;}
+.prompt-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:left;cursor:pointer;transition:border-color .15s;}
+.prompt-card:hover{border-color:var(--accent);}
+.pc-label{font-size:10px;color:var(--accent);font-weight:600;margin-bottom:3px;}
+.pc-text{font-size:11px;color:var(--muted);}
+
+.msg{display:flex;gap:10px;max-width:720px;}
+.msg.user{flex-direction:row-reverse;align-self:flex-end;}
+.avatar{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.avatar.ai{background:var(--accent);color:#fff;}
+.avatar.usr{background:var(--accent2);color:#fff;}
+.bubble{padding:10px 14px;border-radius:11px;font-size:13px;line-height:1.65;max-width:100%;}
+.msg.ai .bubble{background:var(--panel);border:1px solid var(--border);border-top-left-radius:3px;}
+.msg.user .bubble{background:var(--accent);color:#fff;border-top-right-radius:3px;}
+.bubble strong{color:var(--accent2);}
+.msg.user .bubble strong{color:#fff;}
+
+.typing{display:flex;gap:4px;align-items:center;padding:4px 0;}
+.typing span{width:6px;height:6px;background:var(--muted);border-radius:50%;animation:bounce 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-5px);}}
+
+.input-bar{padding:14px 24px 16px;border-top:1px solid var(--border);background:var(--surface);}
+.input-wrap{display:flex;align-items:flex-end;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:9px 11px;transition:border-color .15s;}
+.input-wrap:focus-within{border-color:var(--accent);}
+#userInput{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:14px;font-family:var(--font);resize:none;max-height:120px;line-height:1.5;}
+#userInput::placeholder{color:var(--muted);}
+.send-btn{width:32px;height:32px;border-radius:7px;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s;}
+.send-btn:disabled{opacity:.4;cursor:default;}
+.send-btn svg{width:15px;height:15px;fill:#fff;}
+.input-meta{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--muted);}
+
+/* RIGHT PANEL */
+.right-panel{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:14px;gap:14px;}
+.right-panel::-webkit-scrollbar{width:3px;}
+.right-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.panel-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:5px;}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.metric-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:10px;}
+.metric-card .val{font-size:20px;font-weight:700;}
+.metric-card .lbl{font-size:10px;color:var(--muted);margin-top:1px;}
+.score-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;margin-bottom:5px;gap:7px;}
+.score-row .slabel{color:var(--muted);min-width:80px;}
+.score-row .sval{font-weight:600;min-width:24px;text-align:right;}
+.bar-track{flex:1;height:4px;background:var(--border);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;background:var(--accent);transition:width .6s ease;}
+.tag-list{display:flex;flex-wrap:wrap;gap:5px;}
+.tag{font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid var(--border);background:var(--panel);color:var(--muted);}
+.tag.hot{border-color:var(--yellow);color:var(--yellow);}
+.tag.trending{border-color:var(--green);color:var(--green);}
+.mini-chart{position:relative;height:70px;}
+.mini-chart svg{width:100%;height:100%;}
+.timeline{display:flex;flex-direction:column;gap:8px;}
+.tl-item{display:flex;gap:8px;align-items:flex-start;}
+.tl-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0;}
+.tl-content .tl-phase{font-size:11px;font-weight:600;}
+.tl-content .tl-desc{font-size:10px;color:var(--muted);}
+.divider{height:1px;background:var(--border);}
+
+/* sample demo message styles */
+.demo-note{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);text-align:center;}
+.demo-note strong{color:var(--accent);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+    </div>
+    Smart Business Idea Agent
+    <span class="badge">IBM Granite</span>
+    <span class="badge">Groq Llama 3.3</span>
+  </div>
+  <div class="header-right">
+    <div class="model-pill"><div class="dot"></div> Groq / llama-3.3-70b-versatile</div>
+    <span class="badge live">LIVE</span>
+  </div>
+</header>
+
+<div class="app">
+  <aside>
+    <div class="sidebar-title">Workflows</div>
+    <button class="sidebar-btn active">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+      Idea Generator
+    </button>
+    <button class="sidebar-btn">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      Validate Idea
+    </button>
+    <button class="sidebar-btn">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+      Market Analysis
+    </button>
+    <button class="sidebar-btn">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      Pitch Deck
+    </button>
+    <button class="sidebar-btn">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+      Financials
+    </button>
+    <button class="sidebar-btn">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="12" y1="3" x2="12" y2="21"></line><line x1="3" y1="12" x2="21" y2="12"></line></svg>
+      SWOT Analysis
+    </button>
+    <div class="divider" style="margin:8px 0"></div>
+    <div class="sidebar-title">Quick Prompts</div>
+    <div class="idea-chip">AI SaaS for SMBs</div>
+    <div class="idea-chip">Green E-commerce</div>
+    <div class="idea-chip">HealthTech Startups</div>
+    <div class="idea-chip">EdTech Emerging</div>
+    <div class="idea-chip">Fintech &amp; Blockchain</div>
+    <div class="idea-chip">Remote Work Tools</div>
+  </aside>
+
+  <main>
+    <div class="chat-window" id="chatWindow">
+      <div class="msg ai">
+        <div class="avatar ai">AI</div>
+        <div class="bubble">
+          <strong>Welcome to the Smart Business Idea Agent!</strong><br /><br />
+          I'm powered by <strong>IBM Granite Models</strong> via IBM Orchestrate and <strong>Groq Llama 3.3 70B</strong>. I can help you:<br /><br />
+          • Generate innovative business ideas with market data<br />
+          • Validate and score your startup concepts<br />
+          • Run market analysis with TAM/SAM/SOM breakdowns<br />
+          • Build pitch deck outlines for investors<br />
+          • Model financials with 3-year projections<br />
+          • Perform full SWOT analyses<br /><br />
+          Select a workflow on the left or type your question below.
+        </div>
+      </div>
+      <div class="msg user">
+        <div class="avatar usr">U</div>
+        <div class="bubble">Generate 3 innovative AI SaaS ideas for 2025 with revenue models</div>
+      </div>
+      <div class="msg ai">
+        <div class="avatar ai">AI</div>
+        <div class="bubble">
+          <strong>1. NeuralOps — AI DevOps Co-pilot</strong><br />
+          Automates incident detection, root cause analysis, and runbook execution for engineering teams.<br />
+          <strong>Revenue:</strong> $49–$299/seat/mo · TAM $18B · Est. Year-1 ARR $2.4M<br /><br />
+          <strong>2. PersonaForge — AI Brand Identity Platform</strong><br />
+          Generates complete brand identities (logo, tone, copy, color system) from a single brief in &lt;60 seconds.<br />
+          <strong>Revenue:</strong> $29/mo SMB / $499/mo Agency · TAM $12B · Competition: Low<br /><br />
+          <strong>3. LegalDraft AI — Contract Intelligence for SMBs</strong><br />
+          Reviews, redlines, and auto-generates legal contracts at 1/10th the cost of lawyers.<br />
+          <strong>Revenue:</strong> $79/mo + per-document credits · TAM $25B · ROI: 340%<br /><br />
+          Dashboard scores updated →
+        </div>
+      </div>
+      <div class="demo-note"><strong>Live demo mode.</strong> In the actual file, this chat connects to the Groq API (llama-3.3-70b-versatile) and streams real AI responses. Scores auto-update the right panel.</div>
+    </div>
+
+    <div class="input-bar">
+      <div class="input-wrap">
+        <textarea id="userInput"></textarea>
+        <button class="send-btn">
+          <svg><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"></path></svg>
+        </button>
+      </div>
+      <div class="input-meta">
+        <span>Mode: Idea Generator</span>
+        <span>Groq llama-3.3-70b-versatile · Press Enter to send</span>
+      </div>
+    </div>
+  </main>
+
+  <div class="right-panel">
+    <div>
+      <div class="panel-title">Analysis Dashboard</div>
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="val" style="color:var(--green)">8.4/10</div>
+          <div class="lbl">Viability Score</div>
+        </div>
+        <div class="metric-card">
+          <div class="val" style="color:var(--accent)">$18B</div>
+          <div class="lbl">Market Size</div>
+        </div>
+        <div class="metric-card">
+          <div class="val" style="color:var(--yellow)">Low</div>
+          <div class="lbl">Competition</div>
+        </div>
+        <div class="metric-card">
+          <div class="val" style="color:var(--accent2)">340%</div>
+          <div class="lbl">Est. ROI</div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="panel-title">Idea Scores</div>
+      <div class="score-row">
+        <span class="slabel">Innovation</span>
+        <div class="bar-track"><div class="bar-fill" style="width:88%"></div></div>
+        <span class="sval">88</span>
+      </div>
+      <div class="score-row">
+        <span class="slabel">Scalability</span>
+        <div class="bar-track"><div class="bar-fill" style="width:92%;background:var(--accent2)"></div></div>
+        <span class="sval">92</span>
+      </div>
+      <div class="score-row">
+        <span class="slabel">Feasibility</span>
+        <div class="bar-track"><div class="bar-fill" style="width:74%;background:var(--green)"></div></div>
+        <span class="sval">74</span>
+      </div>
+      <div class="score-row">
+        <span class="slabel">Profitability</span>
+        <div class="bar-track"><div class="bar-fill" style="width:81%;background:var(--yellow)"></div></div>
+        <span class="sval">81</span>
+      </div>
+      <div class="score-row">
+        <span class="slabel">Timing</span>
+        <div class="bar-track"><div class="bar-fill" style="width:95%;background:var(--red)"></div></div>
+        <span class="sval">95</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="panel-title">Trend Tags</div>
+      <div class="tag-list">
+        <span class="tag">AI / ML</span>
+        <span class="tag">SaaS</span>
+        <span class="tag hot">HealthTech</span>
+        <span class="tag trending">Green Tech</span>
+        <span class="tag">Web3</span>
+        <span class="tag hot">GenAI</span>
+        <span class="tag">EdTech</span>
+        <span class="tag trending">FinTech</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="panel-title">Launch Roadmap</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--accent)"></div>
+          <div class="tl-content">
+            <div class="tl-phase">Phase 1 · Validate</div>
+            <div class="tl-desc">Surveys, interviews, MVP prototype</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--accent2)"></div>
+          <div class="tl-content">
+            <div class="tl-phase">Phase 2 · Build</div>
+            <div class="tl-desc">Core product, beta users</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--green)"></div>
+          <div class="tl-content">
+            <div class="tl-phase">Phase 3 · Launch</div>
+            <div class="tl-desc">GTM, first 100 customers</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--yellow)"></div>
+          <div class="tl-content">
+            <div class="tl-phase">Phase 4 · Scale</div>
+            <div class="tl-desc">Seed round, team expansion</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="panel-title">Revenue Projection</div>
+      <div class="mini-chart">
+        <svg>
+          <defs>
+            
+              <stop offset="0%"></stop>
+              <stop offset="100%"></stop>
+            
+          </defs>
+          <path d="M0 65 C40 60 70 52 90 44 C110 36 130 28 155 20 C175 14 200 8 230 5 C245 3 255 2 260 1 L260 70 L0 70 Z" fill="url(#g1)"></path>
+          <path d="M0 65 C40 60 70 52 90 44 C110 36 130 28 155 20 C175 14 200 8 230 5 C245 3 255 2 260 1" fill="none" stroke="#4f8ef7" stroke-width="1.5"></path>
+          <text x="2" y="68" fill="#7a8aa0" font-size="8">$0</text>
+          <text x="220" y="12" fill="#4f8ef7" font-size="8">$2.4M</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p style="text-align:center;font-size:11px;color:#57606a;padding:10px;border-top:1px solid #2a3347;margin-top:auto">Made with IBM Bob</p>
+</body>
+</html>
